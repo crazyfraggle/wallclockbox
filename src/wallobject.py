@@ -1,5 +1,6 @@
 from direct.showbase import DirectObject
 
+
 class WallObject(object):
     def __init__(self):
         self.objects = []

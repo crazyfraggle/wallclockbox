@@ -1,11 +1,12 @@
 import pygame
 from datetime import datetime
-from Numeric import array
+from numpy import array
 
 from wallobject import WallObject
 from roman import RomanNumber
 
 fontfile = '../resources/Starcraft Normal.ttf'
+
 
 class Position(object):
     def __init__(self, x=0, y=0, w=20, h=20):
@@ -15,6 +16,7 @@ class Position(object):
         self.h = h
         self.digit = None
         self.links = []
+
 
 class DigitBox(WallObject):
     def __init__(self, letter, position):
@@ -31,25 +33,26 @@ class DigitBox(WallObject):
         self.position = array(pos)
 
     def on_init(self):
-#        super(DigitBox, self).on_init()
+        #        super(DigitBox, self).on_init()
 
         font = pygame.font.Font(fontfile, 20)
         self.surface = font.render(str(self.letter), True, (0, 255, 255))
 
     def on_loop(self, ms=0):
         if self.movement and not self.vector:
-            print self.letter, "Creating vector"
+            print(self.letter, "Creating vector")
             self.destination = array(self.movement.pop())
 #            print self.destination, self.movement
             self.vector = self.destination - self.position
 #            print self.vector
             self.passedtime = 0
-        elif self.vector:
-#            print ms, self.position, ((self.vector * ms) / self.anim_time)
-            self.position = self.position + ((self.vector * ms) / self.anim_time)
+        elif self.vector is not None:
+            #            print ms, self.position, ((self.vector * ms) / self.anim_time)
+            self.position = self.position + \
+                ((self.vector * ms) / self.anim_time)
             self.passedtime += ms
-            if self.passedtime >= self.anim_time: # A second has passed
-                print self.letter, "Clearing vector"
+            if self.passedtime >= self.anim_time:  # A second has passed
+                print(self.letter, "Clearing vector")
                 self.position = self.destination
                 self.destination = None
                 self.passedtime = 0
@@ -57,6 +60,7 @@ class DigitBox(WallObject):
 
     def on_render(self, surface=None):
         surface.blit(self.surface, self.position.tolist())
+
 
 class WallClock(WallObject):
     def __init__(self):
@@ -88,7 +92,6 @@ class WallClock(WallObject):
         self.lastHour = -1
         self.lastMin = -1
 
-
     def on_init(self):
         self.size = self.width, self.height = 400, 200
         self.surface = pygame.Surface(self.size)
@@ -110,14 +113,14 @@ class WallClock(WallObject):
         if dt.hour != self.lastHour:
             # Update hour block.
             hour = dt.hour
-            if not hour: hour = 24
+            if not hour:
+                hour = 24
             s = str(RomanNumber(hour))
-
 
             # Reset letter positions
             for i in range(len(self.hourX)):
                 self.hourX[i].set_position((20, 20 + (i * 20)))
-            self.hourV[0].set_position((40, 40)) # Only 1
+            self.hourV[0].set_position((40, 40))  # Only 1
             for i in range(len(self.hourI)):
                 self.hourI[i].set_position((60, (i * 20)))
 
@@ -145,10 +148,10 @@ class WallClock(WallObject):
             s = str(RomanNumber(dt.minute))
 
             # Reset letter positions
-            self.minL[0].set_position((120, 40)) # Only 1
+            self.minL[0].set_position((120, 40))  # Only 1
             for i in range(len(self.minX)):
                 self.minX[i].set_position((140, (i * 20)))
-            self.minV[0].set_position((160, 40)) # Only 1
+            self.minV[0].set_position((160, 40))  # Only 1
             for i in range(len(self.minI)):
                 self.minI[i].set_position((180, (i * 20)))
 
@@ -157,7 +160,7 @@ class WallClock(WallObject):
             v = 0
             i = 0
 
-            pos = 0##7 - len(s)
+            pos = 0  # 7 - len(s)
             for c in s:
                 if c == "L":
                     self.minL[l].movement.append([120 + (pos * 20), 100])
@@ -177,7 +180,6 @@ class WallClock(WallObject):
 
         # Now let the children work a little.
         super(WallClock, self).on_loop(ms=ms)
-
 
     def on_render(self, surface=None):
         self.surface.fill((255, 0, 0))

@@ -1,6 +1,6 @@
 #import direct.directbase.DirectStart
 from panda3d.core import PointLight
-from panda3d.direct import DirectObject
+from direct.showbase import DirectObject
 from direct.task import Task
 import sys
 import datetime as dt
@@ -23,42 +23,43 @@ cascade_name = "../resources/haarcascade_mcs_eyepair_big.xml"
 # Global position of camera. Should probably be a singleton object
 position = (0, -50, 0)
 
+
 class WallBox(DirectObject.DirectObject):
     """Being the main container for all subobjects, this also controls camera
     and all other main stuff"""
 
     def __init__(self, xpos, ypos, zpos):
         # Init OpenCV stuff.
-#        self.capture = None
-#        try:
-#            self.capture = cv.CaptureFromCAM(1)
-#        except:
-#            pass
+        #        self.capture = None
+        #        try:
+        #            self.capture = cv.CaptureFromCAM(1)
+        #        except:
+        #            pass
 
-#        self.hasCamera = self.capture is not None
+        #        self.hasCamera = self.capture is not None
 
         # only do the rest of the OpenCV stuff if we actually got a camera.
-#        if self.hasCamera:
-#            self.cascade = cv.Load(cascade_name)
-#            self.win = cv.NamedWindow("result", 0)
-#            self.frame_copy = None
-#            self.frame = None
-#            # OpenCV Variables
-#            self.storage = cv.CreateMemStorage(0)
+        #        if self.hasCamera:
+        #            self.cascade = cv.Load(cascade_name)
+        #            self.win = cv.NamedWindow("result", 0)
+        #            self.frame_copy = None
+        #            self.frame = None
+        #            # OpenCV Variables
+        #            self.storage = cv.CreateMemStorage(0)
 
-#            # Parameters for haar detection
-#            # From the API:
-#            # The default parameters (scale_factor=1.1, min_neighbors=3, flags=0) are tuned 
-#            # for accurate yet slow object detection. For a faster operation on real video 
-#            # images the settings are: 
-#            # scale_factor=1.2, min_neighbors=2, flags=CV_HAAR_DO_CANNY_PRUNING, 
-#            # min_size=<minimum possible face size
-#            self.min_size = (20, 20)
-#            self.image_scale = 1.3
-#            self.haar_scale = 1.2
-#            self.min_neighbors = 2
-#            self.haar_flags = 0
-#            base.taskMgr.add(self.trackEyesTask, "trackEyesTask")
+        #            # Parameters for haar detection
+        #            # From the API:
+        #            # The default parameters (scale_factor=1.1, min_neighbors=3, flags=0) are tuned
+        #            # for accurate yet slow object detection. For a faster operation on real video
+        #            # images the settings are:
+        #            # scale_factor=1.2, min_neighbors=2, flags=CV_HAAR_DO_CANNY_PRUNING,
+        #            # min_size=<minimum possible face size
+        #            self.min_size = (20, 20)
+        #            self.image_scale = 1.3
+        #            self.haar_scale = 1.2
+        #            self.min_neighbors = 2
+        #            self.haar_flags = 0
+        #            base.taskMgr.add(self.trackEyesTask, "trackEyesTask")
 
         # We're not using built-in mouse.
         base.disableMouse()
@@ -106,19 +107,19 @@ class WallBox(DirectObject.DirectObject):
         self.ypos += 1
         if self.ypos > -20:
             self.ypos = -20
-        print self.ypos
+        print(self.ypos)
 
     def onWheelDown(self):
         self.ypos -= 1
-        print self.ypos
+        print(self.ypos)
 
     def shutDown(self):
-        # We might need something like this at some point, but not yet. 
-##        for child in self.children.values():
-##            child.on_cleanup()
+        # We might need something like this at some point, but not yet.
+        # for child in self.children.values():
+        # child.on_cleanup()
 
-#        if self.hasCamera:
-#            cv.DestroyWindow("result")
+        #        if self.hasCamera:
+        #            cv.DestroyWindow("result")
         self.xpos.value = -10000.0
         sys.exit()
 
@@ -132,7 +133,7 @@ class WallBox(DirectObject.DirectObject):
 
     def trackMouseTask(self, task):
         if base.mouseWatcherNode.hasMouse():
-            mpos = base.mouseWatcherNode.getMouse() #get the mouse position
+            mpos = base.mouseWatcherNode.getMouse()  # get the mouse position
 
             # Left<->Right center = 0.
             xpos = mpos.getX()*20
@@ -146,7 +147,8 @@ class WallBox(DirectObject.DirectObject):
         return Task.cont
 
     def trackEyesFromThread(self, task):
-        self.calculate_camera(self.xpos.value, self.ypos.value, self.zpos.value)
+        self.calculate_camera(
+            self.xpos.value, self.ypos.value, self.zpos.value)
         return Task.cont
 
     def trackEyesTask(self, task):
@@ -161,13 +163,14 @@ class WallBox(DirectObject.DirectObject):
 
         if not self.frame_copy:
             self.frame_copy = cv.CreateImage((frame.width, frame.height),
-                                        cv.IPL_DEPTH_8U, frame.nChannels)
+                                             cv.IPL_DEPTH_8U, frame.nChannels)
         cv.Copy(frame, self.frame_copy)
 
         # allocate temporary images
-        gray = cv.CreateImage((self.frame_copy.width, self.frame_copy.height), 8, 1)
+        gray = cv.CreateImage(
+            (self.frame_copy.width, self.frame_copy.height), 8, 1)
         small_img = cv.CreateImage((cv.Round(self.frame_copy.width / self.image_scale),
-                       cv.Round (self.frame_copy.height / self.image_scale)), 8, 1)
+                                    cv.Round(self.frame_copy.height / self.image_scale)), 8, 1)
 
         # convert color input image to grayscale
         cv.CvtColor(self.frame_copy, gray, cv.CV_BGR2GRAY)
@@ -183,7 +186,7 @@ class WallBox(DirectObject.DirectObject):
             faces = cv.HaarDetectObjects(small_img, self.cascade, self.storage,
                                          self.haar_scale, self.min_neighbors, self.haar_flags)
             t2 = dt.datetime.now() - t
-            print "detection time = %s" % t2
+            print("detection time = %s" % t2)
             if faces:
                 rect = faces[0][0]
                 cw = self.frame_copy.width / 2.0
@@ -194,13 +197,13 @@ class WallBox(DirectObject.DirectObject):
 #                self.ypos = -50 + (rect[2]-150)/2
                 self.ypos = -100
 
-                print [xpos, self.ypos, zpos, cw, ch, rect]
+                print([xpos, self.ypos, zpos, cw, ch, rect])
                 self.calculate_camera(xpos, self.ypos, zpos)
 
 
 #                for face_rect in faces:
-                    # the input to cvHaarDetectObjects was resized, so scale the 
-                    # bounding box of each face and convert it to two CvPoints
+                # the input to cvHaarDetectObjects was resized, so scale the
+                # bounding box of each face and convert it to two CvPoints
 #                    print repr(face_rect)
 #                    pt1 = (int(face_rect[0][0] * self.image_scale), int(face_rect[0][1] * self.image_scale))
 #                    pt2 = (int((face_rect[0][0] + face_rect[0][2]) * self.image_scale),
@@ -210,6 +213,7 @@ class WallBox(DirectObject.DirectObject):
         cv.ShowImage("result", self.frame_copy)
 
         return Task.cont
+
 
 def eyecatcher(x, y, z):
     capture = None
@@ -227,10 +231,10 @@ def eyecatcher(x, y, z):
 
     # Parameters for haar detection
     # From the API:
-    # The default parameters (scale_factor=1.1, min_neighbors=3, flags=0) are tuned 
-    # for accurate yet slow object detection. For a faster operation on real video 
-    # images the settings are: 
-    # scale_factor=1.2, min_neighbors=2, flags=CV_HAAR_DO_CANNY_PRUNING, 
+    # The default parameters (scale_factor=1.1, min_neighbors=3, flags=0) are tuned
+    # for accurate yet slow object detection. For a faster operation on real video
+    # images the settings are:
+    # scale_factor=1.2, min_neighbors=2, flags=CV_HAAR_DO_CANNY_PRUNING,
     # min_size=<minimum possible face size
     min_size = (20, 20)
     image_scale = 1.3
@@ -270,7 +274,7 @@ def eyecatcher(x, y, z):
             faces = cv.HaarDetectObjects(small_img, cascade, storage,
                                          haar_scale, min_neighbors, haar_flags)
             t2 = dt.datetime.now() - t
-            print "detection time = %s" % t2
+            print("detection time = %s" % t2)
             if faces:
                 rect = faces[0][0]
                 cw = frame_copy.width / 2.0
@@ -281,7 +285,7 @@ def eyecatcher(x, y, z):
 #                ypos = -50 + (rect[2]-150)/2
                 ypos = -100
 
-                print [xpos, ypos, zpos, cw, ch, rect]
+                print([xpos, ypos, zpos, cw, ch, rect])
                 position = (xpos, ypos, zpos)
 
                 # Set shared values
@@ -295,8 +299,8 @@ def eyecatcher(x, y, z):
 
 
 #                for face_rect in faces:
-                    # the input to cvHaarDetectObjects was resized, so scale the 
-                    # bounding box of each face and convert it to two CvPoints
+                # the input to cvHaarDetectObjects was resized, so scale the
+                # bounding box of each face and convert it to two CvPoints
 #                    print repr(face_rect)
 #                    pt1 = (int(face_rect[0][0] * self.image_scale), int(face_rect[0][1] * self.image_scale))
 #                    pt2 = (int((face_rect[0][0] + face_rect[0][2]) * self.image_scale),
@@ -306,8 +310,9 @@ def eyecatcher(x, y, z):
         cv.ShowImage("result", frame_copy)
 
 # Run forest! Run!
-#Eyecatcher().start()
+# Eyecatcher().start()
 #subprocess.Popen(["./facedetect.py", "--cascade=/home/gobo/Projects/opencv-trunk/data/haarcascades/haarcascade_mcs_eyepair_big.xml", "1"])
+
 
 xpos = Value('d', 0.0)
 ypos = Value('d', -150.0)
@@ -315,6 +320,6 @@ zpos = Value('d', 0.0)
 
 p = Process(target=eyecatcher, args=(xpos, ypos, zpos))
 p.start()
-#p.join()
+# p.join()
 h = WallBox(xpos, ypos, zpos)
 base.run()

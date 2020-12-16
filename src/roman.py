@@ -4,20 +4,21 @@
 
 from datetime import datetime
 
+
 class RomanNumber(object):
     """A small class for writing Roman Numerals"""
 
-    nums = {1: { 1: "I",
-                 5: "V"},
-            2: { 1: "X",
-                 5: "L"},
-            3: { 1: "C",
-                 5: "D"},
-            4: { 1: "M"}}
+    nums = {1: {1: "I",
+                5: "V"},
+            2: {1: "X",
+                5: "L"},
+            3: {1: "C",
+                5: "D"},
+            4: {1: "M"}}
 
     def __init__(self, num=0):
         """Initialize Roman Number
-        
+
         @int num: Integer number to convert.
         """
         self.num = int(num)
@@ -61,12 +62,13 @@ class RomanNumber(object):
     def __str__(self):
         return self.to_string()
 
+
 class RomanTime(object):
     """A small class for printing the current hour and minute as roman numerals."""
 
     def __init__(self, dt=None):
         """Initialize Roman Time.
-        
+
         @datetime dt: Datetime wanted.  If not supplied, datetime.now() is used.
         """
 
@@ -85,11 +87,12 @@ class RomanTime(object):
     def __str__(self):
         return self.to_string()
 
+
 if __name__ == "__main__":
     import sys
-    print "Time is now:", RomanTime()
+    print("Time is now:", RomanTime())
 
     if len(sys.argv) > 1:
-        print "Supplied numbers are:"
+        print("Supplied numbers are:")
         for i in sys.argv[1:]:
-            print "    %s => %s" % (i, RomanNumber(int(i)))
+            print("    %s => %s" % (i, RomanNumber(int(i))))
